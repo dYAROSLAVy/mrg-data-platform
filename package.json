@@ -8,15 +8,17 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "eslint": "^9.10.0",
     "@eslint/js": "^9.10.0",
-    "typescript-eslint": "^8.7.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^15.9.0",
     "prettier": "^3.3.3",
-    "globals": "^15.9.0"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.7.0"
   }
 }
