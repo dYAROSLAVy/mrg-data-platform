@@ -35,5 +35,5 @@ Thumbs.db
 ehthumbs.db
 .history/
 .fleet/
-.vscode/*           # если хочешь — оставь только extensions.json как у тебя
+.vscode/*  
 !.vscode/extensions.json
