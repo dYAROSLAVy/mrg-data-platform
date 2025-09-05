@@ -8,6 +8,7 @@ import { ConnectionPoint } from './domain/point.entity';
 import { Measurement } from './domain/measurement.entity';
 
 import { RowsModule } from './modules/rows/rows.module';
+import { SeriesModule } from './modules/series/series.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RowsModule } from './modules/rows/rows.module';
       synchronize: false,
     }),
     RowsModule,
+    SeriesModule,
   ],
   controllers: [HealthController],
 })
