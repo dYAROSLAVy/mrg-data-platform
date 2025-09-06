@@ -4,6 +4,7 @@ import type { OrderBy, RowVM } from '../../../entities/rows/model/types';
 import { RowsFilters } from './RowsFilters';
 import { RowsTable } from './RowsTable';
 import { useDebounce } from '../lib/useDebounce';
+import { UploadXlsx } from '../../uploadXlsx/ui/UploadXlsx';
 
 export const RowsPage: React.FC = () => {
   const [year, setYear] = React.useState('2022');
@@ -39,8 +40,6 @@ export const RowsPage: React.FC = () => {
       to: `${year}-12`,
     });
     window.open(`/api/series?${params.toString()}`, '_blank');
-
-    console.log(params);
   };
 
   React.useEffect(() => {
@@ -49,6 +48,9 @@ export const RowsPage: React.FC = () => {
 
   return (
     <div>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <UploadXlsx onDone={() => refetch()} />
+      </div>
       <RowsFilters
         year={year}
         onYearChange={setYear}
