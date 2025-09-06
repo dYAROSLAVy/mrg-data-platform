@@ -9,6 +9,7 @@ import { Measurement } from './domain/measurement.entity';
 
 import { RowsModule } from './modules/rows/rows.module';
 import { SeriesModule } from './modules/series/series.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SeriesModule } from './modules/series/series.module';
     }),
     RowsModule,
     SeriesModule,
+    UploadModule,
   ],
   controllers: [HealthController],
 })
