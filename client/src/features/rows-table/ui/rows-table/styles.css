@@ -1,0 +1,66 @@
+.mrg-table {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.mrg-table__controls--bottom {
+  margin-top: auto;
+}
+
+.mrg-table__table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid color-mix(in srgb, var(--grey2), transparent 50%);
+  text-align: center;
+}
+
+.mrg-table__col--pipeline {
+  width: 22ch;
+}
+.mrg-table__col--point {
+  width: 16ch;
+}
+.mrg-table__col--km {
+  width: 5.4ch;
+}
+.mrg-table__col--period {
+  width: 8ch;
+}
+.mrg-table__col--num {
+  width: 11ch;
+}
+.mrg-table__col--actions {
+  width: 9.3ch;
+}
+
+.mrg-table__table:only-child {
+  margin-top: 25px;
+}
+
+.mrg-table__th {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 140%;
+  font-family: var(--poppins);
+}
+
+.mrg-table__td,
+.mrg-table__th {
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--grey2), transparent 50%);
+}
+
+.mrg-table__td--empty {
+  height: 50vh;
+  text-align: center;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.mrg-table__tr {
+  min-height: 52px;
+}

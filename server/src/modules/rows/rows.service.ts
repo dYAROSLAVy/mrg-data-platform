@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Pipeline } from '../../domain/pipeline.entity';
-import { ConnectionPoint } from '../../domain/point.entity';
 import { Measurement } from '../../domain/measurement.entity';
 import { RowsQueryDto } from './dto/rows.query.dto';
 
@@ -10,7 +8,16 @@ export class RowsService {
   constructor(private readonly ds: DataSource) {}
 
   async getRows(q: RowsQueryDto) {
-    const { limit = 100, offset = 0, year, pipelineId, pointId, search, sort = 'period:asc' } = q;
+    const {
+      limit = 100,
+      offset = 0,
+      year,
+      pipelineId,
+      pointId,
+      search,
+      loadBand,
+      sort = 'pipelineName:asc',
+    } = q;
 
     const qb = this.ds
       .getRepository(Measurement)
@@ -26,20 +33,23 @@ export class RowsService {
         s: `%${search.toLowerCase()}%`,
       });
     }
+    if (loadBand === 'ok') {
+      qb.andWhere('m.load_level < :warn', { warn: 40 });
+    } else if (loadBand === 'warn') {
+      qb.andWhere('m.load_level >= :warn AND m.load_level < :critical', { warn: 40, critical: 80 });
+    } else if (loadBand === 'critical') {
+      qb.andWhere('m.load_level >= :critical', { critical: 80 });
+    }
 
     const total = await qb.clone().getCount();
 
-    const [field, dir] = sort.split(':') as [string, 'asc' | 'desc'];
-    const map: Record<string, string> = {
-      period: 'm.period',
-      pipelineName: 'p.name',
-      pointName: 'cp.name',
-      load: 'm.load_level',
-      flow: 'm.flow_mmscmd',
-      tvps: 'm.tvps_mmscmd',
-    };
-    qb.orderBy(map[field] ?? 'm.period', dir.toUpperCase() as 'ASC' | 'DESC')
-      .addOrderBy('p.name', 'ASC')
+    const [, dirRaw] = (sort ?? 'pipelineName:asc').split(':') as [string, 'asc' | 'desc'];
+    const direction = (dirRaw?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC') as 'ASC' | 'DESC';
+
+    qb.orderBy('p.name', direction)
+      .addOrderBy('cp.name', 'ASC')
+      .addOrderBy('cp.km', 'ASC')
+      .addOrderBy('m.id', 'ASC')
       .offset(offset)
       .limit(limit);
     qb.select([

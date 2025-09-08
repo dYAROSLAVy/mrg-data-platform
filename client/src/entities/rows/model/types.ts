@@ -7,11 +7,12 @@ export type OrderBy =
   | 'pointName:desc';
 
 export type RowsQuery = {
-  year: string;
+  year?: string;
   search?: string;
   limit: number;
   offset: number;
   sort: OrderBy;
+  loadBand?: 'ok' | 'warn' | 'critical';
 };
 
 export type RowVM = {

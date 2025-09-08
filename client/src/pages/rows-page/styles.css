@@ -1,0 +1,13 @@
+.mrg-data {
+  padding: 100px 0;
+}
+
+.mrg-data__inner {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  background: var(--white);
+  min-height: 75vh;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+}

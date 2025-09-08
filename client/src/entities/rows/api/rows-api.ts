@@ -1,4 +1,4 @@
-import { baseApi } from '../../../shared/api/baseApi';
+import { baseApi } from '../../../shared/api/base-api';
 import type { RowsQuery, RowsResponse } from '../model/types';
 
 export const rowsApi = baseApi.injectEndpoints({
