@@ -25,28 +25,35 @@ export class SeriesService {
       if (!point) throw new NotFoundException('point not found');
     }
 
+    const periodExpr = `TO_CHAR(m.period, 'YYYY-MM')`;
+
     const qb = this.ds
       .getRepository(Measurement)
       .createQueryBuilder('m')
-      .where('m.pipelineId = :pipelineId', { pipelineId })
-      .orderBy('m.period', 'ASC');
+      .where('m.pipelineId = :pipelineId', { pipelineId });
 
     if (pointId) qb.andWhere('m.pointId = :pointId', { pointId });
-
     if (from) qb.andWhere('m.period >= :from', { from: monthToDate(from) });
     if (to) qb.andWhere('m.period <= :to', { to: monthToDate(to) });
 
-    qb.select([
-      `TO_CHAR(m.period, 'YYYY-MM') AS period`,
-      'm.flow_mmscmd AS flow',
-      'm.tvps_mmscmd AS tvps',
-    ]);
+    if (pointId) {
+      qb.select([`${periodExpr} AS period`, 'm.flow_mmscmd AS flow', 'm.tvps_mmscmd AS tvps']);
+    } else {
+      qb.select([
+        `${periodExpr} AS period`,
+        'SUM(m.flow_mmscmd) AS flow',
+        'SUM(m.tvps_mmscmd) AS tvps',
+      ]).groupBy(periodExpr);
+    }
+
+    qb.orderBy(periodExpr, 'ASC');
 
     const rows = await qb.getRawMany<{
       period: string;
       flow: string | null;
       tvps: string | null;
     }>();
+
     const series = rows.map((r) => ({
       period: r.period,
       flow: r.flow !== null ? Number(r.flow) : null,

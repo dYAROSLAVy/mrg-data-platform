@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
+import { IsInt, IsIn, IsOptional, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class RowsQueryDto {
@@ -38,4 +38,8 @@ export class RowsQueryDto {
   @IsOptional()
   @Matches(/^(period|pipelineName|pointName|load|flow|tvps):(asc|desc)$/)
   sort?: string = 'period:asc';
+
+  @IsOptional()
+  @IsIn(['ok', 'warn', 'critical'])
+  loadBand?: 'ok' | 'warn' | 'critical';
 }

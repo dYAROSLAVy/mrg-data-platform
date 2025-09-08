@@ -1,4 +1,4 @@
-import { baseApi } from '../../../shared/api/baseApi';
+import { baseApi } from '../../../shared/api/base-api';
 
 export type UploadXlsxResult = {
   inserted: number;

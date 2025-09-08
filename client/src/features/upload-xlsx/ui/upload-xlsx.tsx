@@ -1,8 +1,14 @@
-import React from 'react';
-import { useUploadXlsxMutation } from '../../../entities/upload/api/uploadApi';
+import React, { useRef } from 'react';
+import { useUploadXlsxMutation } from '../../../entities/upload/api/upload-api';
+import './styles.css';
 
-export const UploadXlsx: React.FC<{ onDone?: () => void }> = ({ onDone }) => {
+type UploadXlsxProps = { onDone?: () => void; className?: string };
+
+export const UploadXlsx: React.FC<UploadXlsxProps> = ({ onDone, className }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [upload, { isLoading }] = useUploadXlsxMutation();
+
+  const openDialog = () => inputRef.current?.click();
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
     const f = e.target.files?.[0];
@@ -22,26 +28,25 @@ export const UploadXlsx: React.FC<{ onDone?: () => void }> = ({ onDone }) => {
       const msg = err?.data?.message || err?.error || 'Ошибка загрузки';
       alert(msg);
     } finally {
-      e.target.value = '';
+      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
   return (
-    <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+    <div className={`${className ?? ''} upload`}>
       <input
+        className="visually-hidden"
+        ref={inputRef}
         type="file"
         accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         onChange={onChange}
         disabled={isLoading}
-        style={{ display: 'none' }}
+        aria-hidden
+        tabIndex={-1}
       />
-      <button
-        type="button"
-        onClick={(ev) => (ev.currentTarget.previousElementSibling as HTMLInputElement)?.click()}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Загрузка…' : 'Загрузить XLSX'}
+      <button className="upload__button" type="button" onClick={openDialog} disabled={isLoading}>
+        {isLoading ? 'Загрузка…' : 'ЗАГРУЗИТЬ ДАННЫЕ'}
       </button>
-    </label>
+    </div>
   );
 };

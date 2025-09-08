@@ -11,7 +11,7 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ padding: 16, fontFamily: 'system-ui, sans-serif' }}>
+    <div>
       <h1>MRG</h1>
       <p>Backend health: {status === 'idle' ? '...' : status.toUpperCase()}</p>
     </div>
