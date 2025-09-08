@@ -1,0 +1,54 @@
+.load-meter {
+  --lm-w: 110px;
+  --lm-h: 24px;
+
+  position: relative;
+  display: inline-block;
+  inline-size: var(--lm-w);
+  max-inline-size: 100%;
+  block-size: var(--lm-h);
+  vertical-align: middle;
+}
+
+.load-meter__track {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 1px solid color-mix(in srgb, var(--grey2, #c8ccd2), transparent 40%);
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.load-meter__bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  block-size: 100%;
+  inline-size: 0%;
+  background: #33b17a;
+  transition: inline-size 200ms ease;
+}
+
+.load-meter__bar--ok {
+  background: #33b17a;
+}
+.load-meter__bar--warn {
+  background: #f97316;
+}
+.load-meter__bar--critical {
+  background: #ef4444;
+}
+
+.load-meter__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: #111827;
+  pointer-events: none;
+  user-select: none;
+  font-size: 14px;
+  line-height: 186%;
+}

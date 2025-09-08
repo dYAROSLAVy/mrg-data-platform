@@ -1,0 +1,31 @@
+.upload {
+}
+
+.upload__button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 48px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 14px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 147%;
+  border-radius: 8px;
+  word-wrap: break-word;
+  word-break: break-word;
+  background: var(--white);
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--blue);
+  font-weight: 600;
+  color: var(--blue);
+  font-family: var(--roboto);
+}
+
+.upload__button:hover,
+.upload__button:focus {
+  opacity: 0.8;
+}

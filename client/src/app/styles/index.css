@@ -1,0 +1,82 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --white: #ffffff;
+  --blue: #0a8fdc;
+  --bg: #f4f7fe;
+  --grey: #6b7280;
+  --grey2: #c4c4c4;
+  --roboto: 'Roboto', Arial, sans-serif;
+  --poppins: 'Poppins', Arial, sans-serif;
+  --black: #212121;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+html {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 26px;
+  color: var(--black);
+  font-family: var(--roboto);
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+a {
+  text-decoration: none;
+}
+
+.wrapper {
+  position: relative;
+  display: flex;
+  gap: 120px;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  flex-grow: 1;
+}
+
+.visually-hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  border: 0;
+
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+}
+
+.container {
+  width: 100%;
+  max-width: 1920px;
+  min-width: 320px;
+  margin: 0 auto;
+  padding: 0 60px;
+}

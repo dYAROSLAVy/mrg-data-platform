@@ -21,7 +21,7 @@ export const RowsFilters: React.FC<RowsFiltersProps> = ({
   onRefresh,
 }) => {
   return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+    <div>
       <label>
         Год:{' '}
         <select value={year} onChange={(e) => onYearChange(e.target.value)}>
