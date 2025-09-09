@@ -1,6 +1,5 @@
 import * as React from 'react';
-import type { RowVM, OrderBy } from '../../../../entities/rows/model/types';
-import { TableControls } from '../table-controls/table-controls';
+import type { RowVM } from '../../../../entities/rows/model/types';
 import './styles.css';
 import { formatFixed2, formatKm, formatPeriod } from '../../../../shared/utils';
 import { LoadMeter } from '../../../../shared/ui/load-meter/load-meter';
@@ -8,38 +7,12 @@ import { LoadMeter } from '../../../../shared/ui/load-meter/load-meter';
 type RowsTableProps = {
   rows: RowVM[];
   loading: boolean;
-  sort?: OrderBy;
-  onSort: (key: 'period' | 'pipelineName' | 'pointName') => void;
-  meta: { total: number; limit: number; offset: number };
-  onPage: (offset: number) => void;
   onChart: (row: RowVM) => void;
-  limit: number;
-  onLimitChange: (v: number) => void;
 };
 
-export const RowsTable: React.FC<RowsTableProps> = ({
-  rows,
-  loading,
-  sort,
-  onSort,
-  meta,
-  onPage,
-  onChart,
-  limit,
-  onLimitChange,
-}) => {
+export const RowsTable: React.FC<RowsTableProps> = ({ rows, loading, onChart }) => {
   return (
     <div className="mrg-table">
-      {rows.length > 0 && (
-        <TableControls
-          className="mrg-table__controls"
-          limit={limit}
-          onLimitChange={onLimitChange}
-          meta={meta}
-          onPage={onPage}
-        />
-      )}
-
       <div className="mrg-table__scroller">
         <table className="mrg-table__table">
           <colgroup>
@@ -52,20 +25,12 @@ export const RowsTable: React.FC<RowsTableProps> = ({
             <col className="mrg-table__col mrg-table__col--num" />
             <col className="mrg-table__col mrg-table__col--actions" />
           </colgroup>
-          <caption className="visually-hidden">
-            Сводная таблица МРГ (всего {meta.total} записей)
-          </caption>
+          <caption className="visually-hidden">Сводная таблица МРГ</caption>
 
           <thead>
             <tr className="mrg-table__tr">
               <th className="mrg-table__th" rowSpan={2}>
-                <button
-                  type="button"
-                  className="mrg-table__sort-btn"
-                  onClick={() => onSort('pipelineName')}
-                >
-                  Магистральный распределительный газопровод
-                </button>
+                Магистральный распределительный газопровод
               </th>
               <th className="mrg-table__th" colSpan={2}>
                 Точка подключения
@@ -122,8 +87,23 @@ export const RowsTable: React.FC<RowsTableProps> = ({
                       type="button"
                       onClick={() => onChart(r)}
                       aria-label={`Открыть график: ${r.pipelineName}`}
+                      className="mrg-table__chart-btn"
                     >
-                      график
+                      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M0.75 0C1.16421 0 1.5 0.335786 1.5 0.75V18H18.75C19.1642 18 19.5 18.3358 19.5 18.75C19.5 19.1642 19.1642 19.5 18.75 19.5H0.75C0.335786 19.5 0 19.1642 0 18.75V0.75C0 0.335786 0.335786 0 0.75 0Z"
+                          fill="#1C1B1E"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M19.0724 0.0730295C19.4463 0.251114 19.6051 0.698648 19.4271 1.07263L14.4271 11.5726C14.3253 11.7863 14.1287 11.9394 13.8966 11.9857C13.6644 12.032 13.4241 11.966 13.2482 11.8076L8.98028 7.96652L5.42074 15.0856C5.2355 15.4561 4.78499 15.6062 4.41451 15.421C4.04403 15.2358 3.89386 14.7852 4.0791 14.4148L8.0791 6.41476C8.18381 6.20534 8.38031 6.05684 8.61036 6.01327C8.84041 5.96971 9.07761 6.03607 9.25164 6.1927L13.5048 10.0205L18.0728 0.427725C18.2509 0.0537476 18.6984 -0.105055 19.0724 0.0730295Z"
+                          fill="#1C1B1E"
+                        />
+                      </svg>
+                      <span className="visually-hidden">График</span>
                     </button>
                   </td>
                 </tr>
@@ -132,16 +112,6 @@ export const RowsTable: React.FC<RowsTableProps> = ({
           </tbody>
         </table>
       </div>
-
-      {rows.length > 0 && (
-        <TableControls
-          className="mrg-table__controls mrg-table__controls--bottom"
-          limit={limit}
-          onLimitChange={onLimitChange}
-          meta={meta}
-          onPage={onPage}
-        />
-      )}
     </div>
   );
 };

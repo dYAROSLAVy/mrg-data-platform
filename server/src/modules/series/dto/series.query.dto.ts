@@ -8,7 +8,10 @@ export class SeriesQueryDto {
   @IsUUID('all')
   pointId?: string;
 
-  // YYYY-MM
+  @IsOptional()
+  @Matches(/^\d{4}$/)
+  year?: string;
+
   @IsOptional()
   @Matches(/^\d{4}-(0[1-9]|1[0-2])$/)
   from?: string;

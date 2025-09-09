@@ -1,22 +1,27 @@
 import * as React from 'react';
-import './styles.css';
 import { OrderBy, RowVM } from '../../entities/rows/model/types';
 import { useDebounce } from '../../features/rows-table/lib/use-debounce';
 import { UploadXlsx } from '../../features/upload-xlsx/ui/upload-xlsx';
-import SeriesModal from '../../entities/series/ui/series-modal';
+import { SeriesModal } from '../../entities/series/ui/series-modal';
 import { RowsTable } from '../../features/rows-table/ui/rows-table/rows-table';
-import { useGetRowsQuery } from '../../entities/rows/api/rows-api';
-
+import { RowsToolbar } from '../../features/rows-table/ui/rows-toolbar/rows-toolbar';
+import { useGetRowsQuery, useGetYearsQuery } from '../../entities/rows/api/rows-api';
+import './styles.css';
 export const RowsPage: React.FC = () => {
-  const [year, setYear] = React.useState('2022');
+  const [year, setYear] = React.useState<string | undefined>(undefined);
   const [search, setSearch] = React.useState('');
-  const [limit, setLimit] = React.useState(100);
+  const [limit, setLimit] = React.useState(20);
   const [offset, setOffset] = React.useState(0);
   const [sort, setSort] = React.useState<OrderBy>('pipelineName:asc');
   const [loadBand, setLoadBand] = React.useState<'ok' | 'warn' | 'critical' | undefined>(undefined);
-  const [chart, setChart] = React.useState<null | { pipelineId: string; pipelineName: string }>(
-    null,
-  );
+  const [chart, setChart] = React.useState<null | {
+    pipelineId: string;
+    pipelineName: string;
+    pointName?: string;
+    km?: number | string | null;
+    year?: string;
+    years?: string[];
+  }>(null);
 
   const debouncedSearch = useDebounce(search, 300) as string;
 
@@ -29,21 +34,33 @@ export const RowsPage: React.FC = () => {
     loadBand: loadBand || undefined,
   });
 
-  const toggleSort = (key: 'period' | 'pipelineName' | 'pointName') => {
-    const safeKey: 'pipelineName' = 'pipelineName';
-    setSort((prev) => {
-      const [k, d = 'asc'] = (prev ?? 'pipelineName:asc').split(':') as [
-        'pipelineName',
-        'asc' | 'desc',
-      ];
-      const next = k === safeKey && d === 'asc' ? 'desc' : 'asc';
-      return `${safeKey}:${next}` as OrderBy;
-    });
-    setOffset(0);
-  };
+  const { data: years, refetch: refetchYears } = useGetYearsQuery();
+
+  const hasAnyFilter = Boolean((search && search.trim()) || year || loadBand);
+
+  const disableUi = isFetching || ((data?.meta?.total ?? 0) === 0 && !hasAnyFilter);
+
+  const disableControls = isFetching || (data?.meta?.total ?? 0) === 0;
 
   const openChart = (row: RowVM) => {
-    setChart({ pipelineId: row.pipelineId, pipelineName: row.pipelineName });
+    const yearsForPipeline = Array.from(
+      new Set(
+        (data?.data ?? [])
+          .filter((r) => r.pipelineId === row.pipelineId && typeof (r as any).period === 'string')
+          .map((r) => String((r as any).period).slice(0, 4)),
+      ),
+    ).sort((a, b) => Number(a) - Number(b));
+
+    const effectiveYear = (year && year.trim()) || yearsForPipeline[0];
+
+    setChart({
+      pipelineId: row.pipelineId,
+      pipelineName: row.pipelineName,
+      pointName: row.pointName,
+      km: row.km,
+      year: effectiveYear,
+      years: yearsForPipeline,
+    });
   };
 
   React.useEffect(() => {
@@ -58,68 +75,64 @@ export const RowsPage: React.FC = () => {
           <h2 className="visually-hidden">Загрузка данных и визуализация</h2>
           <div className="container">
             <div className="mrg-data__inner">
-              <UploadXlsx className="mrg-data__upload" onDone={() => refetch()} />
-              <div
-                className="rows-filters"
-                style={{ display: 'flex', gap: 12, alignItems: 'center', margin: '12px 0' }}
-              >
-                <label>
-                  Поиск:{' '}
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="МРГ или точка"
-                  />
-                </label>
-                <label>
-                  Год:{' '}
-                  <input
-                    type="text"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    inputMode="numeric"
-                    pattern="\\d{4}"
-                    placeholder="YYYY"
-                    style={{ width: 90 }}
-                  />
-                </label>
-                <label>
-                  Загрузка:{' '}
-                  <select
-                    value={loadBand ?? ''}
-                    onChange={(e) => {
-                      const v = e.target.value as '' | 'ok' | 'warn' | 'critical';
-                      setLoadBand(v === '' ? undefined : v);
-                      setOffset(0);
-                    }}
-                  >
-                    <option value="">Все</option>
-                    <option value="ok">Низкая (&lt; 40%)</option>
-                    <option value="warn">Средняя (40–79%)</option>
-                    <option value="critical">Высокая (≥ 80%)</option>
-                  </select>
-                </label>
-              </div>
-              <RowsTable
-                rows={data?.data ?? []}
-                loading={isFetching}
-                sort={sort}
-                onSort={toggleSort}
-                meta={data?.meta ?? { total: 0, limit, offset }}
-                onPage={(newOffset) => setOffset(newOffset)}
-                onChart={openChart}
+              <UploadXlsx
+                onDone={() => {
+                  refetch();
+                  refetchYears();
+                }}
+              />
+
+              <RowsToolbar
+                disabled={disableUi}
+                controlsDisabled={disableControls}
+                search={search}
+                onSearchChange={(v) => {
+                  setSearch(v);
+                  setOffset(0);
+                }}
+                year={year}
+                years={years}
+                onYearChange={(v) => {
+                  setYear(v);
+                  setOffset(0);
+                }}
+                loadBand={loadBand}
+                onLoadBandChange={(v) => {
+                  setLoadBand(v);
+                  setOffset(0);
+                }}
+                order={sort as 'pipelineName:asc' | 'pipelineName:desc'}
+                onOrderChange={(v) => {
+                  setSort(v as OrderBy);
+                  setOffset(0);
+                }}
+                total={data?.meta?.total ?? 0}
                 limit={limit}
-                onLimitChange={(v) => {
-                  setLimit(v);
+                offset={offset}
+                onLimitChange={(n) => {
+                  setLimit(n);
+                  setOffset(0);
+                }}
+                onPageChange={(next) => setOffset(next)}
+                onReset={() => {
+                  setSearch('');
+                  setYear(undefined);
+                  setLoadBand(undefined);
+                  setSort('pipelineName:asc');
                   setOffset(0);
                 }}
               />
+
+              <RowsTable rows={data?.data ?? []} loading={isFetching} onChart={openChart} />
               <SeriesModal
                 open={!!chart}
                 onClose={() => setChart(null)}
                 pipelineId={chart?.pipelineId || ''}
                 pipelineName={chart?.pipelineName || ''}
+                pointName={chart?.pointName}
+                km={chart?.km as any}
+                year={chart?.year}
+                years={chart?.years}
               />
             </div>
           </div>

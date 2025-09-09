@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
+  min-height: 36px;
   min-width: 30px;
   cursor: pointer;
   background: none;
@@ -38,5 +38,7 @@
 
 .pagination__button:disabled {
   opacity: 0.3;
-  cursor: default;
+  pointer-events: none;
+  outline: none;
+  user-select: none;
 }
