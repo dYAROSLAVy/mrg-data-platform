@@ -20,14 +20,14 @@ export class Measurement {
   point: ConnectionPoint | null = null;
 
   @Column({ type: 'date' })
-  period!: string;
+  period!: Date;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
-  load_level: string | null = null;
+  load_level: number | null = null;
 
-  @Column({ type: 'numeric', precision: 6, scale: 2, nullable: true })
-  flow_mmscmd: string | null = null;
+  @Column({ type: 'numeric', precision: 10, scale: 3, nullable: true })
+  flow_mmscmd: number | null = null;
 
-  @Column({ type: 'numeric', precision: 6, scale: 2, nullable: true })
-  tvps_mmscmd: string | null = null;
+  @Column({ type: 'numeric', precision: 10, scale: 3, nullable: true })
+  tvps_mmscmd: number | null = null;
 }

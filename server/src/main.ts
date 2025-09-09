@@ -5,6 +5,14 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import * as morgan from 'morgan';
 import { randomUUID } from 'node:crypto';
 
+import type { Request, Response, NextFunction } from 'express';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    reqId?: string;
+  }
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const logger = new Logger('HTTP');
@@ -13,8 +21,8 @@ async function bootstrap() {
     new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }),
   );
 
-  app.use((req: any, res: any, next: any) => {
-    req.reqId = req.headers['x-request-id'] || randomUUID();
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    req.reqId = (req.headers['x-request-id'] as string) || randomUUID();
     res.setHeader('x-request-id', req.reqId);
     next();
   });
@@ -23,7 +31,7 @@ async function bootstrap() {
     app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
   }
 
-  app.use((req: any, res: any, next: any) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     const start = Date.now();
     res.on('finish', () => {
       const elapsed = Date.now() - start;
@@ -36,7 +44,11 @@ async function bootstrap() {
         duration_ms: elapsed,
       };
       const level = res.statusCode >= 500 ? 'error' : 'log';
-      (logger as any)[level](JSON.stringify(payload));
+      if (level === 'error') {
+        logger.error(JSON.stringify(payload));
+      } else {
+        logger.log(JSON.stringify(payload));
+      }
     });
     next();
   });
