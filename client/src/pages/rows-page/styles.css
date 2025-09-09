@@ -3,6 +3,7 @@
 }
 
 .mrg-data__inner {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 25px;
@@ -11,4 +12,13 @@
   min-height: 75vh;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   border-radius: 16px;
+}
+
+.mrg-data__inner .rows-toolbar {
+  position: sticky;
+  top: var(--toolbar-top, 0px);
+  z-index: 2;
+  background: var(--white);
+  padding-block: 8px;
+  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.06);
 }

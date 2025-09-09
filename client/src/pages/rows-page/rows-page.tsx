@@ -7,6 +7,7 @@ import { RowsTable } from '../../features/rows-table/ui/rows-table/rows-table';
 import { RowsToolbar } from '../../features/rows-table/ui/rows-toolbar/rows-toolbar';
 import { useGetRowsQuery, useGetYearsQuery } from '../../entities/rows/api/rows-api';
 import './styles.css';
+import { ScrollToTop } from '../../shared/ui/scroll-to-top/scroll-to-top';
 export const RowsPage: React.FC = () => {
   const [year, setYear] = React.useState<string | undefined>(undefined);
   const [search, setSearch] = React.useState('');
@@ -25,7 +26,7 @@ export const RowsPage: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 300) as string;
 
-  const { data, isFetching, refetch } = useGetRowsQuery({
+  const { data, currentData, isLoading, isUninitialized, refetch } = useGetRowsQuery({
     year,
     search: debouncedSearch || undefined,
     limit,
@@ -34,38 +35,74 @@ export const RowsPage: React.FC = () => {
     loadBand: loadBand || undefined,
   });
 
+  const effective = currentData ?? data;
+  const total = effective?.meta?.total ?? 0;
+
   const { data: years, refetch: refetchYears } = useGetYearsQuery();
 
   const hasAnyFilter = Boolean((search && search.trim()) || year || loadBand);
 
-  const disableUi = isFetching || ((data?.meta?.total ?? 0) === 0 && !hasAnyFilter);
+  const isInitialLoading = (isLoading || isUninitialized) && !effective;
 
-  const disableControls = isFetching || (data?.meta?.total ?? 0) === 0;
+  const disableUi = isInitialLoading || (total === 0 && !hasAnyFilter);
 
-  const openChart = (row: RowVM) => {
-    const yearsForPipeline = Array.from(
-      new Set(
-        (data?.data ?? [])
-          .filter((r) => r.pipelineId === row.pipelineId && typeof (r as any).period === 'string')
-          .map((r) => String((r as any).period).slice(0, 4)),
-      ),
-    ).sort((a, b) => Number(a) - Number(b));
+  const disableControls = isInitialLoading || total === 0;
 
-    const effectiveYear = (year && year.trim()) || yearsForPipeline[0];
+  const openChart = React.useCallback(
+    (row: RowVM) => {
+      const rows = (effective?.data ?? []).filter(
+        (r) => r.pipelineId === row.pipelineId && typeof (r as any).period === 'string',
+      );
+      const yearsForPipeline = Array.from(
+        new Set(rows.map((r) => String((r as any).period).slice(0, 4))),
+      ).sort((a, b) => Number(a) - Number(b));
 
-    setChart({
-      pipelineId: row.pipelineId,
-      pipelineName: row.pipelineName,
-      pointName: row.pointName,
-      km: row.km,
-      year: effectiveYear,
-      years: yearsForPipeline,
-    });
-  };
+      const effectiveYear = (year && year.trim()) || yearsForPipeline[0];
+
+      setChart({
+        pipelineId: row.pipelineId,
+        pipelineName: row.pipelineName,
+        pointName: row.pointName,
+        km: row.km,
+        year: effectiveYear,
+        years: yearsForPipeline,
+      });
+    },
+    [effective, year],
+  );
 
   React.useEffect(() => {
     setOffset(0);
   }, [year, debouncedSearch, sort, limit, loadBand]);
+
+  const onSearchChange = React.useCallback((v: string) => {
+    setSearch(v);
+    setOffset(0);
+  }, []);
+  const onYearChange = React.useCallback((v?: string) => {
+    setYear(v);
+    setOffset(0);
+  }, []);
+  const onLoadBandChange = React.useCallback((v?: 'ok' | 'warn' | 'critical') => {
+    setLoadBand(v);
+    setOffset(0);
+  }, []);
+  const onOrderChange = React.useCallback((v: 'pipelineName:asc' | 'pipelineName:desc') => {
+    setSort(v as OrderBy);
+    setOffset(0);
+  }, []);
+  const onLimitChange = React.useCallback((n: number) => {
+    setLimit(n);
+    setOffset(0);
+  }, []);
+  const onPageChange = React.useCallback((next: number) => setOffset(next), []);
+  const onReset = React.useCallback(() => {
+    setSearch('');
+    setYear(undefined);
+    setLoadBand(undefined);
+    setSort('pipelineName:asc');
+    setOffset(0);
+  }, []);
 
   return (
     <div className="wrapper">
@@ -86,44 +123,27 @@ export const RowsPage: React.FC = () => {
                 disabled={disableUi}
                 controlsDisabled={disableControls}
                 search={search}
-                onSearchChange={(v) => {
-                  setSearch(v);
-                  setOffset(0);
-                }}
+                onSearchChange={onSearchChange}
                 year={year}
                 years={years}
-                onYearChange={(v) => {
-                  setYear(v);
-                  setOffset(0);
-                }}
+                onYearChange={onYearChange}
                 loadBand={loadBand}
-                onLoadBandChange={(v) => {
-                  setLoadBand(v);
-                  setOffset(0);
-                }}
+                onLoadBandChange={onLoadBandChange}
                 order={sort as 'pipelineName:asc' | 'pipelineName:desc'}
-                onOrderChange={(v) => {
-                  setSort(v as OrderBy);
-                  setOffset(0);
-                }}
-                total={data?.meta?.total ?? 0}
+                onOrderChange={onOrderChange}
+                total={total}
                 limit={limit}
                 offset={offset}
-                onLimitChange={(n) => {
-                  setLimit(n);
-                  setOffset(0);
-                }}
-                onPageChange={(next) => setOffset(next)}
-                onReset={() => {
-                  setSearch('');
-                  setYear(undefined);
-                  setLoadBand(undefined);
-                  setSort('pipelineName:asc');
-                  setOffset(0);
-                }}
+                onLimitChange={onLimitChange}
+                onPageChange={onPageChange}
+                onReset={onReset}
               />
 
-              <RowsTable rows={data?.data ?? []} loading={isFetching} onChart={openChart} />
+              <RowsTable
+                rows={(effective?.data ?? []) as RowVM[]}
+                loading={isInitialLoading}
+                onChart={openChart}
+              />
               <SeriesModal
                 open={!!chart}
                 onClose={() => setChart(null)}
@@ -135,6 +155,8 @@ export const RowsPage: React.FC = () => {
                 years={chart?.years}
               />
             </div>
+
+            <ScrollToTop hide={!!chart} />
           </div>
         </section>
       </main>

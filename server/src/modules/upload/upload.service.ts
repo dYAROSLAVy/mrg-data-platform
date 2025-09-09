@@ -14,14 +14,14 @@ export class UploadService {
     @InjectRepository(Measurement) private readonly measRepo: Repository<Measurement>,
   ) {}
 
-  private normalizeHeader(v: any): string {
+  private normalizeHeader(v: unknown): string {
     return String(v ?? '')
       .replace(/\u00A0/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
 
-  private normalizeStrong(v: any): string {
+  private normalizeStrong(v: unknown): string {
     return this.normalizeHeader(v)
       .toLowerCase()
       .replace(/[().,:%]/g, ' ')
@@ -31,7 +31,7 @@ export class UploadService {
       .trim();
   }
 
-  private resolveCanonical(v: any): string {
+  private resolveCanonical(v: unknown): string {
     const s = this.normalizeStrong(v);
     const map = new Map<string, string>([
       ['магистральный распределительный газопровод', 'Магистральный распределительный газопровод'],
@@ -51,7 +51,7 @@ export class UploadService {
     return this.normalizeHeader(v);
   }
 
-  private toNum(v: any): number | null {
+  private toNum(v: unknown): number | null {
     if (v === null || v === undefined) return null;
     const s = String(v).trim();
     if (s === '' || s === '-') return null;
@@ -59,7 +59,7 @@ export class UploadService {
     return Number.isFinite(n) ? n : null;
   }
 
-  private toMonthStart(v: any): Date {
+  private toMonthStart(v: unknown): Date {
     if (v instanceof Date) return new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), 1));
     const s = String(v).trim();
     const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
@@ -71,13 +71,13 @@ export class UploadService {
     throw new BadRequestException(`Bad date: ${v}`);
   }
 
-  private parsePeriodOrThrow(v: any, excelRow: number): Date {
+  private parsePeriodOrThrow(v: unknown, excelRow: number): Date {
     if (v instanceof Date) {
       return new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), 1));
     }
 
     if (typeof v === 'number' && Number.isFinite(v)) {
-      const dc: any = (XLSX as any)?.SSF?.parse_date_code?.(v);
+      const dc = (XLSX as any)?.SSF?.parse_date_code?.(v) as { y?: number; m?: number } | undefined;
       if (dc && typeof dc.y === 'number' && typeof dc.m === 'number') {
         const mm = dc.m;
         if (mm < 1 || mm > 12) {
@@ -92,7 +92,6 @@ export class UploadService {
     const s = String(v ?? '').trim();
     const m1 = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);
     if (m1) {
-      const dd = Number(m1[1]);
       const mm = Number(m1[2]);
       const yy = Number(m1[3]);
       if (mm < 1 || mm > 12) {
@@ -124,7 +123,11 @@ export class UploadService {
     const ws = wb.Sheets[wb.SheetNames[0]];
     if (!ws) throw new BadRequestException('Empty workbook');
 
-    const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, {
+      header: 1,
+      raw: true,
+      defval: '',
+    }) as unknown[][];
     if (!rows || rows.length < 2) throw new BadRequestException('No rows');
 
     const r0 = (rows[0] || []).map((c) => this.normalizeHeader(c));
@@ -132,7 +135,6 @@ export class UploadService {
 
     const c0 = this.resolveCanonical(r0[0]);
     const c01 = this.resolveCanonical(r0[1]);
-    const c02 = this.normalizeHeader(r0[2]);
     const c11 = this.resolveCanonical(r1[1]);
     const c12 = this.resolveCanonical(r1[2]);
     const c3 = this.resolveCanonical(r0[3]);
@@ -208,11 +210,11 @@ export class UploadService {
 
       const pipeName = String(r[0] ?? '').trim();
       const pointName = String(r[1] ?? '').trim();
-      const kmRaw = r[2];
-      const periodRaw = r[3];
-      const loadRaw = r[4];
-      const flowRaw = r[5];
-      const tvpsRaw = r[6];
+      const kmRaw: unknown = r[2];
+      const periodRaw: unknown = r[3];
+      const loadRaw: unknown = r[4];
+      const flowRaw: unknown = r[5];
+      const tvpsRaw: unknown = r[6];
 
       if (!pipeName || !pointName || !periodRaw) {
         skipped++;
@@ -298,7 +300,8 @@ export class UploadService {
           patch.tvps_mmscmd = tvps_mmscmd;
 
         if (Object.keys(patch).length) {
-          await this.measRepo.update(where as any, patch);
+          Object.assign(existing, patch);
+          await this.measRepo.save(existing);
           updated++;
         } else {
           skipped++;

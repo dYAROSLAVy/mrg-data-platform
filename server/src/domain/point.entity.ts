@@ -23,8 +23,8 @@ export class ConnectionPoint {
   @Column({ type: 'varchar', length: 256 })
   name!: string;
 
-  @Column({ type: 'numeric', precision: 8, scale: 1, nullable: true })
-  km: string | null = null;
+  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
+  km: number | null = null;
 
   @OneToMany(() => Measurement, (m) => m.point)
   measurements!: Measurement[];
