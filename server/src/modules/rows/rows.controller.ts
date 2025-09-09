@@ -10,4 +10,9 @@ export class RowsController {
   async getRows(@Query() q: RowsQueryDto) {
     return this.service.getRows(q);
   }
+
+  @Get('years')
+  async getYears() {
+    return this.service.getYears();
+  }
 }

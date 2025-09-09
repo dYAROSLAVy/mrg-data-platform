@@ -25,7 +25,7 @@ export class RowsService {
       .leftJoinAndSelect('m.pipeline', 'p')
       .leftJoinAndSelect('m.point', 'cp');
 
-    if (year) qb.andWhere('EXTRACT(YEAR FROM m.period) = :year', { year: Number(year) });
+    if (year) qb.andWhere('LEFT(m.period::text, 4) = :year', { year: String(year) });
     if (pipelineId) qb.andWhere('p.id = :pipelineId', { pipelineId });
     if (pointId) qb.andWhere('cp.id = :pointId', { pointId });
     if (search) {
@@ -47,6 +47,7 @@ export class RowsService {
     const direction = (dirRaw?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC') as 'ASC' | 'DESC';
 
     qb.orderBy('p.name', direction)
+      .addOrderBy('m.period', 'ASC')
       .addOrderBy('cp.name', 'ASC')
       .addOrderBy('cp.km', 'ASC')
       .addOrderBy('m.id', 'ASC')
@@ -92,5 +93,15 @@ export class RowsService {
     }));
 
     return { data, meta: { total, limit, offset } };
+  }
+  async getYears(): Promise<number[]> {
+    const raw = await this.ds
+      .getRepository(Measurement)
+      .createQueryBuilder('m')
+      .select('DISTINCT CAST(LEFT(m.period::text, 4) AS INTEGER)', 'year')
+      .orderBy('year', 'DESC')
+      .getRawMany<{ year: string | number }>();
+
+    return raw.map((r) => Number(r.year)).filter((n) => Number.isFinite(n));
   }
 }

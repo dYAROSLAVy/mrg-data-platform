@@ -1,39 +1,45 @@
-.table-controls {
+.rows-sort {
   display: flex;
-  align-items: center;
-  justify-content: end;
-  gap: 14px;
+  align-items: end;
+  gap: 12px;
 }
 
-.table-controls__label {
-  min-height: 36px;
+.rows-sort__group {
+  display: grid;
+  gap: 4px;
+}
+
+.rows-sort__label {
   font-weight: 400;
   font-size: 16px;
   line-height: 137%;
   color: var(--grey);
 }
 
-.table-controls__select {
-  appearance: none;
-  padding: 6px 28px 6px 10px;
-  min-width: 72px;
-  border: none;
+.rows-sort__select {
+  block-size: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--grey2, #e5e7eb);
   border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0L7.57534 7.64L15.1507 0H0Z' fill='%236B7280'/%3E%3C/svg%3E")
       no-repeat right 8px center / 16px 8px,
     linear-gradient(transparent, transparent) padding-box;
-  font: inherit;
-  color: inherit;
 }
 
-.table-controls__select:hover,
-.table-controls__select:focus {
+.rows-sort__select:hover,
+.rows-sort__select:focus {
   opacity: 0.8;
   outline: 1px solid var(--grey);
 }
 
-.table-controls__select:disabled {
+.rows-sort__select:disabled {
   opacity: 0.3;
   pointer-events: none;
   outline: none;

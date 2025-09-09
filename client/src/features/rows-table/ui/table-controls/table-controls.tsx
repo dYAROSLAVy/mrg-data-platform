@@ -10,18 +10,24 @@ type TableControlsProps = {
   onLimitChange: (v: number) => void;
   onPage: (offset: number) => void;
   className?: string;
+  disabled?: boolean;
 };
 
 export const TableControls: React.FC<TableControlsProps> = React.memo(
-  ({ meta, limit, onLimitChange, onPage, className }) => {
+  ({ meta, limit, onLimitChange, onPage, className, disabled = false }) => {
     return (
-      <div className={`${className ?? ''} table-controls`}>
+      <div
+        className={className ? `${className} table-controls` : 'table-controls'}
+        aria-disabled={disabled}
+      >
         <label className="table-controls__label">
           Записей на странице:{' '}
           <select
             className="table-controls__select"
+            id="limit"
             value={limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
+            disabled={disabled}
           >
             {[20, 50, 100].map((n) => (
               <option key={n} value={n}>
@@ -31,7 +37,14 @@ export const TableControls: React.FC<TableControlsProps> = React.memo(
           </select>
         </label>
 
-        <Pagination total={meta.total} limit={meta.limit} offset={meta.offset} onChange={onPage} />
+        <Pagination
+          total={meta.total}
+          limit={meta.limit}
+          offset={meta.offset}
+          onChange={(next) => {
+            if (!disabled) onPage(next);
+          }}
+        />
       </div>
     );
   },

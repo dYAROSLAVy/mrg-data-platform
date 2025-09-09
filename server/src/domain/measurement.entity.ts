@@ -20,7 +20,7 @@ export class Measurement {
   point: ConnectionPoint | null = null;
 
   @Column({ type: 'date' })
-  period!: string; // YYYY-MM-01
+  period!: string;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
   load_level: string | null = null;

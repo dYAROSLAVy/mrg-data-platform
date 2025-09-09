@@ -15,6 +15,9 @@ export class SeriesService {
 
   async getSeries(q: SeriesQueryDto) {
     const { pipelineId, pointId, from, to } = q;
+    const anyQ = q as any;
+    const year: number | undefined = anyQ?.year ? Number(anyQ.year) : undefined;
+    const hasRange = Boolean(from) || Boolean(to);
 
     const pipeline = await this.ds.getRepository(Pipeline).findOne({ where: { id: pipelineId } });
     if (!pipeline) throw new NotFoundException('pipeline not found');
@@ -33,6 +36,11 @@ export class SeriesService {
       .where('m.pipelineId = :pipelineId', { pipelineId });
 
     if (pointId) qb.andWhere('m.pointId = :pointId', { pointId });
+    if (!hasRange && year && Number.isFinite(year)) {
+      const fromY = `${year}-01-01`;
+      const toY = `${year + 1}-01-01`;
+      qb.andWhere('m.period >= :fromY AND m.period < :toY', { fromY, toY });
+    }
     if (from) qb.andWhere('m.period >= :from', { from: monthToDate(from) });
     if (to) qb.andWhere('m.period <= :to', { to: monthToDate(to) });
 

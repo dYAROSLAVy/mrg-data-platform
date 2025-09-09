@@ -19,7 +19,11 @@ export const rowsApi = baseApi.injectEndpoints({
         Object.assign(currentCache, newItems);
       },
     }),
+    getYears: build.query<number[], void>({
+      query: () => ({ url: '/rows/years' }),
+      transformResponse: (resp: number[]) => resp ?? [],
+    }),
   }),
 });
 
-export const { useGetRowsQuery } = rowsApi;
+export const { useGetRowsQuery, useGetYearsQuery } = rowsApi;
