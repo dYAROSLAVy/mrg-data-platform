@@ -10,15 +10,17 @@ export type GetSeriesArgs = {
   year?: string;
 };
 
+export type SeriesResponse = {
+  pipeline: { id: string; name: string };
+  point: { id: string; name: string; km: string | null } | null;
+  series: SeriesPoint[];
+};
+
 export const seriesApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getSeries: build.query<SeriesPoint[], GetSeriesArgs>({
       query: (args) => ({ url: '/series', params: args }),
-      transformResponse: (resp: {
-        pipeline: { id: string; name: string };
-        point: any;
-        series: SeriesPoint[];
-      }) => resp.series,
+      transformResponse: (resp: SeriesResponse) => resp.series,
     }),
   }),
 });

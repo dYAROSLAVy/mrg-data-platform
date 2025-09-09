@@ -44,8 +44,14 @@ export const UploadXlsx: React.FC<UploadXlsxProps> = ({ onStart, onDone, classNa
         `Импорт завершён:\n+${res.inserted} добавлено\n~${res.updated} обновлено\n${res.skipped} пропущено`,
       );
       onDone?.();
-    } catch (err: any) {
-      const msg = err?.data?.message || err?.error || 'Ошибка загрузки';
+    } catch (err: unknown) {
+      let msg = 'Ошибка загрузки';
+      if (err instanceof Error) {
+        msg = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const e = err as { data?: { message?: string }; error?: string };
+        msg = e.data?.message || e.error || msg;
+      }
       alert(msg);
     } finally {
       if (inputRef.current) inputRef.current.value = '';
