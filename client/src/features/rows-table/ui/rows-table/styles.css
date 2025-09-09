@@ -4,10 +4,6 @@
   flex-grow: 1;
 }
 
-.mrg-table__controls--bottom {
-  margin-top: auto;
-}
-
 .mrg-table__table {
   table-layout: fixed;
   width: 100%;
@@ -36,10 +32,6 @@
   width: 9.3ch;
 }
 
-.mrg-table__table:only-child {
-  margin-top: 25px;
-}
-
 .mrg-table__th {
   font-weight: 700;
   font-size: 15px;
@@ -61,6 +53,20 @@
   line-height: 1.5;
 }
 
-.mrg-table__tr {
-  min-height: 52px;
+.mrg-table__chart-btn {
+  padding: 0 40px;
+  min-height: 30px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+}
+
+.mrg-table__chart-btn:hover,
+.mrg-table__chart-btn:focus {
+  outline: 1px solid var(--grey);
+}
+
+.mrg-table__chart-btn:active {
+  opacity: 0, 5;
 }

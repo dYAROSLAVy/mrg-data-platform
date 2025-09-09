@@ -5,6 +5,7 @@
 .mrg-data__inner {
   display: flex;
   flex-direction: column;
+  gap: 25px;
   padding: 25px;
   background: var(--white);
   min-height: 75vh;
