@@ -1,3 +1,7 @@
+## MRG Data Platform
+
+Небольшой стек для загрузки XLSX и визуализации данных (React + NestJS + Postgres). В репозитории добавлен пример данных для быстрой проверки.
+
 ## Run
 
 ### 0) Requirements
@@ -24,6 +28,25 @@ docker compose --env-file .env.example exec backend npm run migration:run
 - **Backend health:** http://localhost:8080/health → `{ "ok": true }`
 - **PostgreSQL (Adminer):** http://localhost:8081  
   Server: `db` · System: `PostgreSQL` · User/Pass: `mrg`/`mrg` · DB: `mrg`
+
+## Демо-данные
+
+В репозитории есть пример файла: `examples/Данные.xlsx`.
+
+### Вариант A — через интерфейс
+
+1. Откройте **Frontend**: http://localhost:3000
+2. Используйте форму загрузки XLSX (кнопка «Загрузить XLSX») и выберите файл `examples/Данные.xlsx`.
+
+### Вариант B — через API (cURL)
+
+```bash
+curl -X POST \
+  -F "file=@examples/Данные.xlsx" \
+  http://localhost:8080/api/upload/xlsx
+```
+
+После успешной загрузки данные станут доступны в списке строк и графиках. Для просмотра содержимого БД можно использовать Adminer (см. URLs выше).
 
 ### 3) Полезные команды
 
